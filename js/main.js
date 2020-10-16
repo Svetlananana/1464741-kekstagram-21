@@ -1,9 +1,10 @@
 'use strict';
 
-const randomUserPhoto = document.querySelector(`.picture__img`);
-const pictureComments = document.querySelector(`.picture__comments`);
-const pictureLikes = document.querySelector(`.picture__likes`);
+// const randomUserPhoto = document.querySelector(`.picture__img`);
+// const pictureComments = document.querySelector(`.picture__comments`);
+// const pictureLikes = document.querySelector(`.picture__likes`);
 const similarPictureTemplate = document.querySelector(`#picture`).content.querySelector(`.picture`); // не до конца понимаю этот код
+const newFragment = document.createDocumentFragment();
 
 const COMMENT_OPTIONS = [
   `Всё отлично!`,
@@ -22,11 +23,11 @@ const createMockObjects = function () {
     url: `photos/${getRandomNumber(1, 25)}.jpg`,
     description: `описание фотографии`,
     likes: getRandomNumber(15, 200),
-     comments {
+    comments: {
       avatar: `img/avatar-${getRandomNumber(1, 6)}.svg`,
       message: getRandomNumber,
-      name: `Артем`,
-    };
+      name: COMMENT_OPTIONS[getRandomNumber(0, COMMENT_OPTIONS.length)],
+    },
   };
 };
 
@@ -34,16 +35,17 @@ const createMockObjects = function () {
 const photosObject = [];
 
 for (let i = 0; i < PHOTOS_OBJECT_TOTAL; i++) {
-  wizards[i] = createMockObjects();
+  photosObject[i] = createMockObjects();
 }
 
 for (let i = 0; i < photosObject .length; i++) {
   const photosElement = similarPictureTemplate.cloneNode(true);
 
-  photosElement.querySelector(`.picture__img`).setAttribute(`src`, comments.avatar);
+  // photosElement.querySelector(`.picture__img`).setAttribute(`src`, comments.avatar);
+  photosElement.querySelector(`.picture__img`).image = photosObject[i].comments.avatar; // и тут непонятно
   photosElement.querySelector(`.picture__comments`).textContent = photosObject[i].description;
   photosElement.querySelector(`.picture__likes`).textContent = photosObject[i].likes;
-  similarListElement.appendChild(photosElement);
+  newFragment.appendChild(photosElement); // вот тут тоже не соображу
 }
 // я не понимаю, почему комментарий это отдельный объект и какие конкретно данные в нем должны храниться кроме комментариев?
 
