@@ -20,34 +20,43 @@ const NAME = [
   `Митя`,
 ];
 
+const DESCRIPTION_PHOTO = [
+  `если ты сильный, значит сильнее того, кто слабее`,
+  `Плачу на техно!`,
+  `ууфь, ша-ла-ла!`,
+  `Ведь, если звезды зажигают —
+значит — это кому-нибудь нужно?`,
+  `Продам гараж`,
+  `Историю составляют только люди, нарушающие правила`,
+  `Лучше быть последним - первым, чем первым - последним`
+];
+
 const PHOTOS_OBJECT_TOTAL = 25;
 const MIN_LIKES = 15;
 const MAX_LIKES = 200;
 const MAX_AVATAR = 6;
-const MAX_COMMENTS = 6;
+const MAX_COMMENTS = 4;
 
-const similarPictureTemplate = document.querySelector(`#picture`).content.querySelector(`.picture`);
+const similarPictureTemplate = document
+  .querySelector(`#picture`)
+  .content.querySelector(`.picture`);
 const newPictures = document.querySelector(`.pictures`);
 
 const getRandomNumber = (min, max) =>
   min + Math.floor(Math.random() * (max - min - 1));
-
-// создаем основную функцию для массива с фотографиями пользователей
 
 const photosArray = [];
 const createMockObjects = () => {
   for (let i = 0; i < PHOTOS_OBJECT_TOTAL; i++) {
     photosArray[i] = {
       url: `photos/${i + 1}.jpg`,
-      description: `описание фотографии`,
+      description: DESCRIPTION_PHOTO[getRandomNumber(0, DESCRIPTION_PHOTO.length)],
       likes: getRandomNumber(MIN_LIKES, MAX_LIKES),
       comments: createComments(getRandomNumber(1, MAX_COMMENTS)),
     };
   }
   return photosArray;
 };
-
-// генерация массива комментария со случайными данными
 
 const createComments = (commentsCount) => {
   const comments = [];
@@ -64,71 +73,63 @@ const createComments = (commentsCount) => {
 
 createMockObjects();
 
-// заполнение блока DOM-элементами на основе массива JS-объектов
-
 for (let i = 0; i < photosArray.length; i++) {
   const photosElement = similarPictureTemplate.cloneNode(true);
 
   photosElement.querySelector(`.picture__img`).src = photosArray[i].url;
-  photosElement.querySelector(`.picture__comments`).textContent = photosArray[i].comments.length;
-  photosElement.querySelector(`.picture__likes`).textContent = photosArray[i].likes;
+  photosElement.querySelector(`.picture__comments`).textContent =
+    photosArray[i].comments.length;
+  photosElement.querySelector(`.picture__likes`).textContent =
+    photosArray[i].likes;
   newPictures.appendChild(photosElement);
 }
 
-/* Покажите элемент .big-picture, удалив у него класс hidden и заполните его информацией из первого элемента массива с данными:
-
-Адрес изображения url подставьте как src изображения внутри блока.big-picture__img. */
-
-/* Количество лайков likes подставьте как текстовое содержание элемента .likes-count.
-
-Количество комментариев comments подставьте как текстовое содержание элемента .comments-count.
-
-Список комментариев под фотографией: комментарии должны вставляться в блок .social__comments. Разметка каждого комментария должна выглядеть так:
-
-<li class="social__comment">
-    <img
-        class="social__picture"
-        src="{{аватар}}"
-        alt="{{имя комментатора}}"
-        width="35" height="35">
-    <p class="social__text">{{текст комментария}}</p>
-</li>
-Описание фотографии description вставьте строкой в блок .social__caption.
-
-Спрячьте блоки счётчика комментариев .social__comment-count и загрузки новых комментариев .comments-loader, добавив им класс hidden.
-
-Добавьте на <body> класс modal-open, чтобы контейнер с фотографиями позади не прокручивался при скролле. */
-
+// вторая часть
 
 const bigPicture = document.querySelector(`.big-picture`);
 bigPicture.classList.remove(`hidden`);
 
-document.querySelector(`.big-picture__img`).src = photosArray[0].url;
-document.querySelector(`.likes-count`).textContent = photosArray[0].likes;
-document.querySelector(`.comments-count`).textContent = photosArray[0].comments.length;
-document.querySelector(`.social__caption`).textContent = photosArray[0].description;
+const fillCommentsList = (parentComments, comments) => {
+  parentComments.innerHTML = ``;
+  const fragment = document.createDocumentFragment();
 
-const parentComments = document.querySelector(`.social__comments`);
-const socialComment = document.createElement(`li`);
-socialComment.classList.add(`social__comment`);
+  comments.forEach(function (comment) {
+    const socialComment = document.createElement(`li`);
+    socialComment.classList.add(`social__comment`);
 
-parentComments.append(socialComment);
+    const socialPicture = document.createElement(`img`);
+    socialPicture.classList.add(`social__picture`);
+    socialComment.append(socialPicture);
+    socialPicture.setAttribute(`src`, `${comment.avatar}`);
+    socialPicture.setAttribute(`alt`, `${comment.name}`);
+    socialPicture.setAttribute(`width`, `35`);
+    socialPicture.setAttribute(`height`, `35`);
 
-const socialPicture = document.createElement(`img`);
-socialPicture.classList.add(`social__picture`);
-socialComment.append(socialPicture);
-socialPicture.setAttribute(`src`, `${photosArray[0].comments[0].avatar}`);
-socialPicture.setAttribute(`alt`, `${photosArray[0].comments[0].name}`);
-socialPicture.setAttribute(`width`, `35`);
-socialPicture.setAttribute(`height`, `35`);
+    const socialText = document.createElement(`p`);
+    socialText.classList.add(`social__text`);
+    socialText.textContent = comment.message;
+    socialComment.append(socialText);
+    fragment.append(socialComment);
+  });
+  parentComments.append(fragment);
+};
 
-const socialText = document.createElement(`p`);
-socialText.classList.add(`social__text`);
-socialText.textContent = photosArray[0].comments[0].message; // а можно как-то оптимизировать указание индексов в массиве?
-socialComment.append(socialText);
+const createSocialComment = function (targetPhoto) {
+  document.querySelector(`.big-picture__img`).firstElementChild.src =
+    targetPhoto.url;
+  document.querySelector(`.likes-count`).textContent = targetPhoto.likes;
+  document.querySelector(`.comments-count`).textContent =
+    targetPhoto.comments.length;
+  document.querySelector(`.social__caption`).textContent =
+    targetPhoto.description;
+
+  const parentComments = document.querySelector(`.social__comments`);
+  fillCommentsList(parentComments, targetPhoto.comments);
+};
+
+const targetPhoto = photosArray[0];
+createSocialComment(targetPhoto);
 
 document.querySelector(`.social__comment-count`).classList.add(`hidden`);
 document.querySelector(`.comments-loader`).classList.add(`hidden`);
 document.querySelector(`body`).classList.add(`modal-open`);
-// нужно ли для выше написанное выносить в функцию?
-
